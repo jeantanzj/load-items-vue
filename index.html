@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome to Vue</title>
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/vue-async-computed"></script>
+</head>
+<body>
+  <div id="app">
+   <div style="display:flex; width:600px;">
+     <div style="width:50%">
+        <h1>Async</h1>
+        <ul v-for="(value, i) in getItemsAsync">
+            <li> {{value}}</li>
+           </ul>
+     </div>
+     <div>
+       <h1>Sync</h1>
+        <ul v-for="(value, i) in getItems">
+            <li> {{value}}</li>
+           </ul>
+     </div>
+   </div>
+  </div>
+
+  <script>
+
+    function myAsyncRequest(){
+      return new Promise((resolve)=>{
+        setTimeout(function() {
+          resolve([new Date()])
+        }, 200)
+      })
+    }
+
+    function myRequest(callback){
+        setTimeout(function() {
+          callback([new Date()])
+        }, 200)
+    }
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        itemsAsync: ['hiAsync', 'world'],
+        items: ['heySync', 'jupiter'],
+        i: 0,
+        j: 0
+      },
+      computed: {
+        getItems: function(){
+          let self = this
+          if(!this.finishedLoading(this.j)){
+            myRequest(function(result){
+              self.items = self.items.concat(result)
+              self.j = self.j+1
+            })
+          }
+          return this.items
+        }
+      },
+      asyncComputed: {
+        getItemsAsync: async function(){
+          if(!this.finishedLoading(this.i)){
+            result = await myAsyncRequest()
+            this.itemsAsync = this.itemsAsync.concat(result)
+            this.i = this.i + 1
+          }
+          return this.itemsAsync
+        }
+      },
+      methods: {
+        finishedLoading: function(counter){
+          return counter === 10
+        }
+      }
+    })
+  </script>
+</body>
+</html>
